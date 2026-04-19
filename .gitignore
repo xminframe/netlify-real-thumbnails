@@ -1,0 +1,15 @@
+# Dependencies
+node_modules/
+
+# macOS
+.DS_Store
+*.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+
+# Tampermonkey / Editor files
+*.user.js.meta
+.vscode/
+.idea/

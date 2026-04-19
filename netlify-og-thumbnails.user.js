@@ -9,6 +9,8 @@
 // @grant        GM_xmlhttpRequest
 // @grant        GM_addStyle
 // @run-at       document-idle
+// @downloadURL  https://raw.githubusercontent.com/xminframe/netlify-real-thumbnails/main/netlify-og-thumbnails.user.js
+// @updateURL    https://raw.githubusercontent.com/xminframe/netlify-real-thumbnails/main/netlify-og-thumbnails.user.js
 // ==/UserScript==
 
 (() => {

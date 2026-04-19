@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Netlify → Real OG Image Thumbnails
-// @namespace    https://github.com/
-// @version      1.5
-// @description  Replaces Netlify default thumbnails with real Open Graph images
+// @namespace    https://github.com/xminframe/netlify-real-thumbnails
+// @version      1.6
+// @description  Replaces Netlify default thumbnails with real Open Graph images (supports List and Grid view)
 // @author       Grok
 // @match        https://app.netlify.com/*
 // @connect      netlify.app
@@ -16,10 +16,13 @@
 (() => {
     'use strict';
 
-    const cache = new Map(); // liveUrl → ogImageUrl | null (null = failed)
+    const cache = new Map(); // liveUrl → ogImageUrl | null
 
     GM_addStyle(`
-        img[data-og-replaced] { object-fit: cover !important; border-radius: 8px; }
+        img[data-og-replaced] { 
+            object-fit: cover !important; 
+            border-radius: 8px; 
+        }
     `);
 
     async function fetchOgImage(liveUrl) {
@@ -32,7 +35,7 @@
                 timeout: 8000,
                 onload: (response) => {
                     if (response.status !== 200) {
-                        cache.set(liveUrl, null);   // cache failure
+                        cache.set(liveUrl, null);
                         return resolve(null);
                     }
 
@@ -41,10 +44,10 @@
                     const ogUrl = meta ? meta.getAttribute("content") : null;
 
                     if (ogUrl) {
-                        const absoluteUrl = ogUrl.startsWith('http')
-                            ? ogUrl
+                        const absoluteUrl = ogUrl.startsWith('http') 
+                            ? ogUrl 
                             : liveUrl.replace(/\/$/, '') + (ogUrl.startsWith('/') ? ogUrl : '/' + ogUrl);
-
+                        
                         cache.set(liveUrl, absoluteUrl);
                         resolve(absoluteUrl);
                     } else {
@@ -60,25 +63,35 @@
         });
     }
 
-    function getProjectNameFromCard(card) {
-        const projectLink = card.querySelector('a[href^="/projects/"]');
+    function getProjectNameFromElement(element) {
+        const projectLink = element.querySelector('a[href^="/projects/"]');
         if (projectLink) {
             const match = projectLink.getAttribute('href').match(/\/projects\/([^/]+)/);
             if (match && match[1]) return match[1];
         }
+
+        const allLinks = element.querySelectorAll('a[href^="/projects/"]');
+        for (const link of allLinks) {
+            const match = link.getAttribute('href').match(/\/projects\/([^/]+)/);
+            if (match && match[1]) return match[1];
+        }
+
         return null;
     }
 
     function processThumbnails() {
-        const thumbnails = document.querySelectorAll('img.tw-aspect-screenshot, img[src*=".webp"]');
+        const thumbnails = document.querySelectorAll('img.tw-aspect-screenshot');
 
         thumbnails.forEach(async (img) => {
             if (img.dataset.ogReplaced) return;
 
-            const card = img.closest('li.clickable') || img.closest('.media');
-            if (!card) return;
+            const container = img.closest('li') || 
+                             img.closest('a[href^="/projects/"]') || 
+                             img.closest('div');
 
-            const projectName = getProjectNameFromCard(card);
+            if (!container) return;
+
+            const projectName = getProjectNameFromElement(container);
             if (!projectName) return;
 
             const liveUrl = `https://${projectName}.netlify.app/`;
@@ -97,8 +110,7 @@
         processThumbnails();
         const container = document.querySelector('main') || document.body;
         observer.observe(container, { childList: true, subtree: true });
-        // Polling kept but at a gentler interval
-        setInterval(processThumbnails, 3000);
+        setInterval(processThumbnails, 2500);
     }
 
     if (document.readyState === 'loading') {

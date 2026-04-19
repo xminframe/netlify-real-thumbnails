@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6] - 2026-04-19
+### Added
+- Full support for both **List view** and **Grid view**
+- More robust project name detection
+- Better container traversal for grid layout
+
+### Improved
+- Cleaner and more maintainable code structure
+
 ## [1.5] - 2026-04-19
 ### Added
 - Failure caching to prevent repeated requests while waiting for Tampermonkey permissions
